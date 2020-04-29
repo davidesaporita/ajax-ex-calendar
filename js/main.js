@@ -10,15 +10,32 @@ $(document).ready(function () {
     // Punto di partenza
     var baseMonth = moment('2018-01-01'); 
 
-    // Init Hndlenars
+    // Init Handlebars
     var source = $('#day-template').html();
     var template = Handlebars.compile(source);
 
     // print giorno
-    printMonth(template, baseMonth);
-
-    // ottieni festività mese corrente
+    activeDate = printMonth(template, baseMonth);
     printHoliday(baseMonth);
+    checkMonth(activeDate);    
+    
+    $(document).on('click','.next', function() { 
+        activeDate = moment(activeDate.add(1, 'month'));
+        $('.month-list > li').remove();
+        printMonth(template, activeDate);
+        printHoliday(activeDate);
+        checkMonth(activeDate);
+    });
+
+    $(document).on('click','.prev', function() {
+        activeDate = moment(activeDate.subtract(1, 'month'));
+        $('.month-list > li').remove();
+        printMonth(template, activeDate);
+        printHoliday(activeDate);
+        checkMonth(activeDate);
+    });
+
+    
 
 }); // <-- End doc ready
 
@@ -58,6 +75,8 @@ function printMonth(template, date) {
         var html = template(context);
         $('.month-list').append(html);
     }
+
+    return date;
 }
 
 // Ottieni e stampa festività
@@ -75,7 +94,6 @@ function printHoliday(date) {
 
             for (var i = 0; i < holidays.length; i++) {
                 var thisHoliday = holidays[i];
-
                 var listItem = $('li[data-complete-date="' + thisHoliday.date + '"]');
 
                 if(listItem) {
@@ -88,4 +106,11 @@ function printHoliday(date) {
             console.log('Errore chiamata festività'); 
         }
     });
+}
+
+function checkMonth (date) {
+    var currentMonth = date.month();
+   
+    if(currentMonth == '0')  $('.prev').hide(); else $('.prev').show(); 
+    if(currentMonth == '11') $('.next').hide(); else $('.next').show();
 }
