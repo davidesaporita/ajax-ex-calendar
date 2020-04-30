@@ -1,116 +1,116 @@
 /**
  * WELCOME TO MOMENT JS
  */
-$(document).ready(function () {
+$(document).ready(function (e) {
     
-    /**
-     * SETUP
-     */
-
-    // Punto di partenza
-    var baseMonth = moment('2018-01-01'); 
+    // V2
+    // Vars & Refs
+    var startingDate = moment('2018-01-01');
+    var monthLabel = $('.month-label');
+    var monthlyList = $('.monthly-list');
 
     // Init Handlebars
-    var source = $('#day-template').html();
-    var template = Handlebars.compile(source);
+    var sourceDay = $('#test').html();
+    var sourceHoliday = $('#holiday-temp').html();
+    var templateDay = Handlebars.compile(sourceDay);
+    var templateHoliday = Handlebars.compile(sourceHoliday);
 
-    // print giorno
-    activeDate = printMonth(template, baseMonth);
-    printHoliday(baseMonth);
-    checkMonth(activeDate);    
+    activeDate = monthlyCal(startingDate, templateDay);
+    applyHolidays(startingDate);
+    checkMonth(startingDate); 
+    
     
     $(document).on('click','.next', function() { 
         activeDate = moment(activeDate.add(1, 'month'));
-        $('.month-list > li').remove();
-        printMonth(template, activeDate);
-        printHoliday(activeDate);
+        $('.monthly-list > *').remove();
+        monthlyCal(activeDate, templateDay);
+        applyHolidays(activeDate);
         checkMonth(activeDate);
     });
 
     $(document).on('click','.prev', function() {
         activeDate = moment(activeDate.subtract(1, 'month'));
-        $('.month-list > li').remove();
-        printMonth(template, activeDate);
-        printHoliday(activeDate);
+        $('.monthly-list > *').remove();
+        monthlyCal(activeDate, templateDay);
+        applyHolidays(activeDate);
         checkMonth(activeDate);
     });
 
-    
+    /*************************************
+        FUNCTIONS
+    *************************************/
+
+    // Functions
+
+    function monthlyCal(date, template) {
+        var daysInMonth = date.daysInMonth();    
+        monthLabel.html( date.format('MMMM YYYY') ); //  setta header
+        monthLabel.attr('data-fulldate', date.format('YYYY-MM-DD'));
+        
+        var startingWeekDay = date.weekday();
+        for( var i = 0; i < startingWeekDay; i++) {
+            var data = {
+                dayNumber: '',
+                fullDate: ''
+            };
+
+            monthlyList.append(template(data));
+        }
+
+        for(var i = 0; i < daysInMonth; i++) {
+            var thisDate = moment({
+                year: date.year(),
+                month: date.month(),
+                day: i + 1
+            });
+
+            var data = {
+                dayNumber: thisDate.format('D'),
+                fullDate: thisDate.format('YYYY-MM-DD')
+            };
+
+            monthlyList.append(template(data));
+        }
+
+        return date;
+    }
+
+    function applyHolidays(date) {
+        $.ajax({
+            url: 'https://flynn.boolean.careers/exercises/api/holidays' ,
+            method: 'GET',
+            data: {
+                year: date.year(),
+                month: date.month()
+            },
+            success: function(dataHolidays) {
+                var holidays = dataHolidays.response;
+
+                for (var i = 0; i < holidays.length; i++) {
+                    var thisHoliday = holidays[i];
+                    var listItem = $('.day[data-fulldate="' + thisHoliday.date + '"]');
+
+                    if(listItem) {
+                        var data = {
+                            holidayName: thisHoliday.name
+                        }
+                        listItem.append(templateHoliday(data));
+                    }
+                }
+            },
+            error: function() {
+                console.log('Errore chiamata festività'); 
+            }
+        });
+    }
+
+
+    function checkMonth (date) {
+        var currentMonth = date.month();
+
+        if(currentMonth == '0')  $('.prev').hide(); else $('.prev').show(); 
+        if(currentMonth == '11') $('.next').hide(); else $('.next').show();
+    }
 
 }); // <-- End doc ready
 
-
-/*************************************
-    FUNCTIONS
- *************************************/
-
-// Stampa a schermo i giorni del mese
-function printMonth(template, date) {
-    // numero giorni nel mese
-    var daysInMonth = date.daysInMonth();
-
-    //  setta header
-    $('h1').html( date.format('MMMM YYYY') );
-
-    // Imposta data attribute data visualizzata
-    $('.month').attr('data-this-date',  date.format('YYYY-MM-DD'));
-
-    // genera giorni mese
-    for (var i = 0; i < daysInMonth; i++) {
-        // genera data con moment js
-        var thisDate = moment({
-            year: date.year(),
-            month: date.month(),
-            day: i + 1
-        });
-
-        // imposta dati template
-        var context = {
-            class: 'day',
-            day: thisDate.format('DD MMMM'),
-            completeDate: thisDate.format('YYYY-MM-DD')
-        };
-
-        //compilare e aggiungere template
-        var html = template(context);
-        $('.month-list').append(html);
-    }
-
-    return date;
-}
-
-// Ottieni e stampa festività
-function printHoliday(date) {
-    // chiamo API
-    $.ajax({
-        url: 'https://flynn.boolean.careers/exercises/api/holidays' ,
-        method: 'GET',
-        data: {
-            year: date.year(),
-            month: date.month()
-        },
-        success: function(res) {
-            var holidays = res.response;
-
-            for (var i = 0; i < holidays.length; i++) {
-                var thisHoliday = holidays[i];
-                var listItem = $('li[data-complete-date="' + thisHoliday.date + '"]');
-
-                if(listItem) {
-                    listItem.addClass('holiday');
-                    listItem.text( listItem.text() + ' - ' + thisHoliday.name );
-                }
-            }
-        },
-        error: function() {
-            console.log('Errore chiamata festività'); 
-        }
-    });
-}
-
-function checkMonth (date) {
-    var currentMonth = date.month();
-   
-    if(currentMonth == '0')  $('.prev').hide(); else $('.prev').show(); 
-    if(currentMonth == '11') $('.next').hide(); else $('.next').show();
-}
