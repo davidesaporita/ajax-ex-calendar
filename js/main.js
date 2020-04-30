@@ -3,7 +3,6 @@
  */
 $(document).ready(function (e) {
     
-    // V2
     // Vars & Refs
     var startingDate = moment('2018-01-01');
     var monthLabel = $('.month-label');
@@ -40,12 +39,16 @@ $(document).ready(function (e) {
         FUNCTIONS
     *************************************/
 
-    // Functions
-
     function monthlyCal(date, template) {
         var daysInMonth = date.daysInMonth();    
-        monthLabel.html( date.format('MMMM YYYY') ); //  setta header
+        monthLabel.html(date.format('MMMM YYYY')); //  setta header
         monthLabel.attr('data-fulldate', date.format('YYYY-MM-DD'));
+        
+        var activeMonthLabel = date.format('MMMM').toLowerCase();
+        var activeMonthNumber = addZero(date.format('M'));
+        var backgroundUrl = 'url("img/bkg_' + activeMonthNumber + '_' + activeMonthLabel + '.jpg")';
+        
+        $('.header').css('background-image', backgroundUrl);
         
         var startingWeekDay = date.weekday();
         for( var i = 0; i < startingWeekDay; i++) {
@@ -104,13 +107,14 @@ $(document).ready(function (e) {
         });
     }
 
-
     function checkMonth (date) {
         var currentMonth = date.month();
-
         if(currentMonth == '0')  $('.prev').hide(); else $('.prev').show(); 
         if(currentMonth == '11') $('.next').hide(); else $('.next').show();
     }
 
-}); // <-- End doc ready
+    function addZero(num) {
+        return (num < 10 ? ('0' + num) : num);
+    }
 
+}); // <-- End doc ready

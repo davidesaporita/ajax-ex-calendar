@@ -20,20 +20,22 @@ li.holiday {
 /* GOOGLE CALENDAR STYLE */
 
 #app {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     height: 100vh;
     width: 100%;
+    padding-top: 30px;
     background-color: #eee;
+}
+
+.fas {
+    cursor: pointer;
 }
 
 .google-container {
     display: flex;
     flex-direction: column;
     width: 1024px;
-    height: 768px;
-    margin: auto;
+    min-height: 768px;
+    margin: 0 auto;
     box-shadow: 0 0 20px rgba(0,0,0,.2);
 }
 
@@ -42,18 +44,24 @@ li.holiday {
     justify-content: space-between;
     flex-basis: 150px;
     padding: 46px 40px 0;
-    background-image: url('../img/bkg_12_december.jpg');
+    background-image: url('../img/bkg_01_january.jpg');
     background-size: cover;
-    background-position: center -370px;
+    background-position: center -390px;
     background-repeat: no-repeat;
+    transition: background-image .3s;
 }
 
 .header .header-left {
     display: flex;
 }
 
+.header .header-left > * {
+    padding-left: 20px;
+}
+
 .header .month-label {
     font-weight: 600;
+    width: 140px;
 }
 
 .main {
